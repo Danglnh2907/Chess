@@ -657,7 +657,6 @@ public class ChessBoard extends JPanel {
          * 2. The King is in checked state, and the move save the King
          * 3. The King is not in checked state, and the move didn't lead to checked state
          * Here, we assume that the row and col (destination position) is valid, so we check for the other criterias
-         * (The logic for validate destination row and col would be the handleMouseClick method)
          */
 
         //First, get the old coordinate of the current selected piece
@@ -751,10 +750,12 @@ public class ChessBoard extends JPanel {
                     ourPiece = getPieceAt(row, col);
                     //Since the king is being checked -> opponent must exist -> there is no need to handle NullPointerException
                     if (ourPiece != null && ourPiece.getColor() == king.getColor() && ourPiece.hasPosition(opponent.getPosition())) {
-                        //We check if taking the opponent piece still make the King being checked
-                        simulateMove(ourPiece, opponent.getPosition().getRow(), opponent.getPosition().getCol());
-                        if (!isChecked(king)) {
-                            return false;
+                        //We check that the our piece can actually capture the opponent
+                        if (ourPiece.hasPosition(new Point(opponent.getPosition().getRow(), opponent.getPosition().getCol()))) {
+                            //We check if taking the opponent piece still make the King being checked
+                            if (simulateMove(ourPiece, opponent.getPosition().getRow(), opponent.getPosition().getCol())) {
+                                return false;
+                            }
                         }
                     }
                 }
@@ -766,28 +767,29 @@ public class ChessBoard extends JPanel {
                 int rowDiff = Integer.compare(king.getPosition().getRow(), opponent.getPosition().getRow());
                 int colDiff = Integer.compare(king.getPosition().getCol(), opponent.getPosition().getCol());
 
-                //Now iterate over the path from the checkPiece to the King
-                int curRow = opponent.getPosition().getRow() + rowDiff;
-                int curCol = opponent.getPosition().getCol() + colDiff;
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        int curRow = opponent.getPosition().getRow() + rowDiff;
+                        int curCol = opponent.getPosition().getCol() + colDiff;
 
-                while (curRow != king.getPosition().getRow() || curCol != king.getPosition().getCol()) {
-                    //For each square along the path, check if one of our pieces can block the check piece
-                    for (int row = 0; row < 8; row++) {
-                        for (int col = 0; col < 8; col++) {
+                        while (curRow != king.getPosition().getRow() || curCol != king.getPosition().getCol()) {
+                            //For each square along the path, check if one of our pieces can block the check piece
                             ourPiece = getPieceAt(row, col);
                             if (ourPiece != null && ourPiece.getColor() == king.getColor() && ourPiece.hasPosition(new Point(curRow, curCol))) {
-                                //Check if that the new move cannot solve the problem
-                                simulateMove(ourPiece, king.getPosition().getRow(), king.getPosition().getCol());
-                                if (!isChecked(king)) {
-                                    return false;
+                                //Check if the current position in the opponent path can be reach by the current our piece
+                                if (ourPiece.hasPosition(new Point(curRow, curCol))) {
+                                    //If yes, the we perform simulate move (simulate move is true if that move didn't lead to check)
+                                    if (simulateMove(ourPiece, curRow, curCol)) {
+                                        return false;
+                                    }
                                 }
                             }
+
+                            //Move along the path
+                            curRow += rowDiff;
+                            curCol += colDiff;
                         }
                     }
-
-                    //Move along the path
-                    curRow += rowDiff;
-                    curCol += colDiff;
                 }
             }
         } else {
@@ -942,4 +944,3 @@ public class ChessBoard extends JPanel {
         highlight((Graphics2D) g);
     }
 }
- 
