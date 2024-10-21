@@ -567,7 +567,7 @@ public class ChessBoard extends JPanel {
      */
     private void updateMove(Piece piece) {
         switch (piece.getRank()) {
-            case PAWN:
+            case PAWN: 
                 getPawnMove(piece);
                 break;
             case ROOK:
