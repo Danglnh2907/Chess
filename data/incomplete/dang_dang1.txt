@@ -1,0 +1,7 @@
+WHITE PAWN (6,6) moves to (4,6)
+BLACK PAWN (1,1) moves to (3,1)
+WHITE BISHOP (7,5) moves to (5,7)
+BLACK PAWN (3,1) moves to (4,1)
+WHITE KNIGHT (7,6) moves to (5,5)
+BLACK PAWN (4,1) moves to (5,1)
+White Short Castling

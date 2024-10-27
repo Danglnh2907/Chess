@@ -1,7 +1,0 @@
-WHITE PAWN (6,4) moves to (4,4)
-BLACK PAWN (1,0) moves to (3,0)
-WHITE QUEEN (7,3) moves to (3,7)
-BLACK PAWN (3,0) moves to (4,0)
-WHITE BISHOP (7,5) moves to (4,2)
-BLACK PAWN (4,0) moves to (5,0)
-WHITE QUEEN (3,7) moves to (1,5)

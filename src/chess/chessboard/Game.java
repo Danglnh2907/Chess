@@ -160,6 +160,13 @@ public class Game extends JPanel implements Listener {
         this.chessboard.setBlackKing(blackKing);
         this.chessboard.setWhiteKing(whiteKing);
 
+        this.chessboard.getCanCastle()[0] = true;
+        this.chessboard.getCanCastle()[1] = true;
+        this.chessboard.getCanCastle()[2] = true;
+        this.chessboard.getCanCastle()[3] = true;
+        this.chessboard.getCanCastle()[4] = true;
+        this.chessboard.getCanCastle()[5] = true;
+
         //Update all the pieces candidates list
         this.chessboard.updateAllMoves();
     }
@@ -205,6 +212,13 @@ public class Game extends JPanel implements Listener {
                         rank = Rank.ROOK;
                     }
                     this.chessboard.promote(rank);
+                } else if (move[2].equalsIgnoreCase("Castling")) {
+                    if (move[1].equalsIgnoreCase("Long")) {
+                        this.chessboard.Castling(true);
+                    } else {
+                        this.chessboard.Castling(false);
+                    }
+                    isWhiteTurn = !isWhiteTurn;
                 } else {
                     //First, select the piece
                     oldR = (int) (move[2].charAt(1) - '0');
@@ -274,6 +288,25 @@ public class Game extends JPanel implements Listener {
          */
         Piece selectedPiece = this.chessboard.getSelectedPiece();
 
+        //Check for special case (castling)
+        if (selectedPiece != null && selectedPiece.getRank() == Rank.KING
+                && chessboard.getPieceAt(row, col) != null && chessboard.getPieceAt(row, col).getRank() == Rank.ROOK
+                && chessboard.getPieceAt(row, col).getColor() == selectedPiece.getColor()) {
+            if ((row == 0 || row == 7) && col == 0) {
+                chessboard.Castling(true);
+                this.moveRecords.add(String.format("%s Long Castling", isWhiteTurn ? "White" : "Black"));
+            } else if ((row == 0 || row == 7) && col == 7) {
+                chessboard.Castling(false);
+                this.moveRecords.add(String.format("%s Short Castling", isWhiteTurn ? "White" : "Black"));
+            }
+            this.sidePanel.addMove(this.moveRecords.get(this.moveRecords.size() - 1));
+            isWhiteTurn = !isWhiteTurn;
+
+            //Update the state of the board
+            chessboard.update();
+            return;
+        }
+
         //Check for move action
         if (selectedPiece != null && selectedPiece.hasPosition(new Point(row, col))) {
             //First check if the move is valid by running simulate move
@@ -325,7 +358,6 @@ public class Game extends JPanel implements Listener {
                     this.sidePanel.addMove("Checked!");
                 }
 
-                //Update the view
                 return;
             }
         }

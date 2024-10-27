@@ -57,7 +57,7 @@ public class Point {
      */
     public void setRow(int row) throws IllegalArgumentException {
         //Check if row parameter is valid
-        if (ModelLib.isCoorValid(row)) {
+        if (!ModelLib.isCoorValid(row)) {
             throw new IllegalArgumentException("Row must be an integer between 0 and 7");
         }
         //Set the new row value
@@ -82,7 +82,7 @@ public class Point {
      */
     public void setCol(int col) throws IllegalArgumentException {
         //Check if col parameter is valid
-        if (ModelLib.isCoorValid(col)) {
+        if (!ModelLib.isCoorValid(col)) {
             throw new IllegalArgumentException("Column must be an integer between 0 and 7");
         }
         //Set the new column value

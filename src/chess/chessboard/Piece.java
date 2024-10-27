@@ -208,6 +208,10 @@ public class Piece {
         }
         return this.candidates.contains(pos);
     }
+    
+    public boolean hasPosition(int row, int col) {
+        return hasPosition(new Point(row, col));
+    }
 
     /**
      * Overridden equals method for comparing Piece object.

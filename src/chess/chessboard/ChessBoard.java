@@ -30,6 +30,13 @@ public class ChessBoard extends JPanel {
     //The listener object, used to communicate with the Game object
     private Listener listener;
 
+    private final Boolean[] canCastle = new Boolean[6];
+    private boolean isWhiteTurn = true;
+
+    public Boolean[] getCanCastle() {
+        return canCastle;
+    }
+
     /**
      * Constructor method of class ChessBoard, which will initialize attribute
      * and setup layout.
@@ -567,7 +574,7 @@ public class ChessBoard extends JPanel {
      */
     private void updateMove(Piece piece) {
         switch (piece.getRank()) {
-            case PAWN: 
+            case PAWN:
                 getPawnMove(piece);
                 break;
             case ROOK:
@@ -824,6 +831,45 @@ public class ChessBoard extends JPanel {
         //We set the new position to selected piece
         this.board[row][col] = this.selectedPiece;
 
+        //If the moving piece is either Rook or King, disqualified it from castling
+        if (selectedPiece.getRank() == Rank.ROOK && oldRow == 0 && oldCol == 0) {
+            if (takenPiece != null && takenPiece.getRank() == Rank.ROOK && takenPiece.getPosition().equals(new Point(0, 0))) {
+                canCastle[0] = null;
+            } else {
+                canCastle[0] = false;
+            }
+        } else if (selectedPiece.getRank() == Rank.KING && oldRow == 0 && oldCol == 4) {
+            if (takenPiece != null && takenPiece.getRank() == Rank.KING && takenPiece.getPosition().equals(new Point(0, 4))) {
+                canCastle[1] = null;
+            } else {
+                canCastle[1] = false;
+            }
+        } else if (selectedPiece.getRank() == Rank.ROOK && oldRow == 0 && oldCol == 7) {
+            if (takenPiece != null && takenPiece.getRank() == Rank.ROOK && takenPiece.getPosition().equals(new Point(0, 7))) {
+                canCastle[2] = null;
+            } else {
+                canCastle[2] = false;
+            }
+        } else if (selectedPiece.getRank() == Rank.ROOK && oldRow == 7 && oldCol == 0) {
+            if (takenPiece != null && takenPiece.getRank() == Rank.ROOK && takenPiece.getPosition().equals(new Point(7, 0))) {
+                canCastle[3] = null;
+            } else {
+                canCastle[3] = false;
+            }
+        } else if (selectedPiece.getRank() == Rank.KING && oldRow == 7 && oldCol == 4) {
+            if (takenPiece != null && takenPiece.getRank() == Rank.KING && takenPiece.getPosition().equals(new Point(7, 4))) {
+                canCastle[4] = null;
+            } else {
+                canCastle[4] = false;
+            }
+        } else if (selectedPiece.getRank() == Rank.ROOK && oldRow == 7 && oldCol == 7) {
+            if (takenPiece != null && takenPiece.getRank() == Rank.ROOK && takenPiece.getPosition().equals(new Point(7, 7))) {
+                canCastle[5] = null;
+            } else {
+                canCastle[5] = false;
+            }
+        }
+        isWhiteTurn = !isWhiteTurn;
         return takenPiece;
     }
 
@@ -854,6 +900,172 @@ public class ChessBoard extends JPanel {
                 return;
             }
         }
+    }
+
+    private boolean CanShortCastling(Color side) {
+        /*
+             * Algorithm explains: a castiling (whichever side) can only be performed if it meets these requirement
+             * 1. Both the King and the Rook must not be moved (which means, move a King/Rook, then return them to the initial Position also
+             * not valid)
+             * 2. There is no Piece stand between them
+             * 3. The King must not be in checked state
+             * 4. The Square that the King passes through must not be under attack of the opponent
+             * 5. The destination of the King must not be under attack of the opponent
+             * So we check for each condition
+         */
+
+        //If the Rook (right) has been taken before they can move, we invalid the short castling
+        if (canCastle[side == Color.BLACK ? 1 : 4] == null) {
+            return false;
+        }
+
+        //If either Rook (right) or King has moved, return false
+        if (canCastle[side == Color.BLACK ? 1 : 4] == false || canCastle[side == Color.BLACK ? 2 : 5] == false) {
+            return false;
+        }
+
+        //If the King is currently being checked, return false
+        if (isChecked(side == Color.BLACK ? this.getBlackKing() : this.getWhiteKing())) {
+            return false;
+        }
+
+        //Check if the next two square to the right is under attack
+        Piece piece, oldSelectedPiece = getSelectedPiece();
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                piece = getPieceAt(row, col);
+                if (piece != null && piece.getColor() != side) {
+                    //Select the piece to calculate the move it can actually move
+                    setSelectedPiece(piece);
+                    //Check if the next 2 square (0, 5) / (7, 5) and (0, 6) / (7, 6) are under attack
+                    if (piece.hasPosition(side == Color.BLACK ? 0 : 7, 5) || piece.hasPosition(side == Color.BLACK ? 0 : 7, 6)) {
+                        return false;
+                    }
+                }
+
+            }
+        }
+
+        //Restore the selected piece 
+        setSelectedPiece(oldSelectedPiece);
+        return true;
+    }
+
+    /// <summary>
+    /// Method for checking if the current player can perform a long castling
+    /// </summary>
+    /// <param name="side">The side of the player for determining</param>
+    /// <returns>Boolean value, true if that player can perfor short castling, false otherwise</returns>
+    private boolean CanLongCastling(Color side) {
+        /*
+             * Algorithm explains: a castiling (whichever side) can only be performed if it meets these requirement
+             * 1. Both the King and the Rook must not be moved (which means, move a King/Rook, then return them to the initial Position also
+             * not valid)
+             * 2. There is no Piece stand between them
+             * 3. The King must not be in checked state
+             * 4. The Square that the King passes through must not be under attack of the opponent
+             * 5. The destination of the King must not be under attack of the opponent
+             * So we check for each condition
+         */
+
+        //If the Rook (left) has been taken before they can move, we invalid the short castling
+        if (canCastle[side == Color.BLACK ? 1 : 4] == null) {
+            return false;
+        }
+
+        //If either Rook (left) or King has moved, return false
+        if (canCastle[side == Color.BLACK ? 1 : 4] == false || canCastle[side == Color.BLACK ? 0 : 3] == false) {
+            return false;
+        }
+
+        //If the King is currently being checked, return false
+        if (isChecked(side == Color.BLACK ? getBlackKing() : getWhiteKing())) {
+            return false;
+        }
+
+        //Check if the next two square to the right is under attack
+        Piece piece, oldSelectedPiece = getSelectedPiece();
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                piece = getPieceAt(row, col);
+                if (piece != null && piece.getColor() != side) {
+                    //Select the piece to calculate the move it can actually move
+                    setSelectedPiece(piece);
+                    //Check if the next 2 square (0, 1) / (7, 1) and (0, 2) / (7, 2) and (0, 3) / (7, 3) are under attack
+                    if (piece.hasPosition(side == Color.BLACK ? 0 : 7, 1)
+                            || piece.hasPosition(side == Color.BLACK ? 0 : 7, 2)
+                            || piece.hasPosition(side == Color.BLACK ? 0 : 7, 3)) {
+                        return false;
+                    }
+                }
+
+            }
+        }
+
+        //Restore the selected piece 
+        setSelectedPiece(oldSelectedPiece);
+        return true;
+    }
+
+    /// <summary>
+    /// Method for perform long castling
+    /// </summary>
+    private void LongCastling() {
+        if (CanLongCastling(isWhiteTurn ? Color.WHITE : Color.BLACK)) {
+            Piece rook = getPieceAt(isWhiteTurn ? 7 : 0, 0);
+            Piece king = isWhiteTurn ? getWhiteKing() : getBlackKing();
+
+            //Update the internal coordinate of the rook and king
+            if (rook != null) {
+                //This is just for type safe checking, if CanShortCastling is true, then rook is guaranteed is not null
+                rook.getPosition().setCol(3);
+            }
+            king.getPosition().setCol(2);
+
+            board[isWhiteTurn ? 7 : 0][3] = rook;
+            board[isWhiteTurn ? 7 : 0][2] = king;
+
+            board[isWhiteTurn ? 7 : 0][4] = null;
+            board[isWhiteTurn ? 7 : 0][0] = null;
+        }
+    }
+
+    /// <summary>
+    /// Method for perform short catsling
+    /// </summary>
+    private void ShortCastling() {
+        if (CanShortCastling(isWhiteTurn ? Color.WHITE : Color.BLACK)) {
+            Piece rook = getPieceAt(isWhiteTurn ? 7 : 0, 7);
+            Piece king = isWhiteTurn ? getWhiteKing() : getBlackKing();
+
+            //Update the internal coordinate of the rook and king
+            if (rook != null) {
+                //This is just for type safe checking, if CanShortCastling is true, then rook is guaranteed is not null
+                rook.getPosition().setCol(5);
+            }
+            king.getPosition().setCol(6);
+
+            board[isWhiteTurn ? 7 : 0][5] = rook;
+            board[isWhiteTurn ? 7 : 0][6] = king;
+
+            board[isWhiteTurn ? 7 : 0][4] = null;
+            board[isWhiteTurn ? 7 : 0][7] = null;
+        }
+    }
+
+    /// <summary>
+    /// The actual method for perform castling
+    /// </summary>
+    /// <param name="isLongCastling">Boolean value to signify if this is a long castling (true) or short castling (false)</param>
+    public void Castling(boolean isLongCastling) {
+        if (isLongCastling) {
+            LongCastling();
+        } else {
+            ShortCastling();
+        }
+        
+        isWhiteTurn = !isWhiteTurn;
+        setSelectedPiece(null);
     }
 
     /**
