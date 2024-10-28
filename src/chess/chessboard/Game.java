@@ -17,6 +17,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -405,7 +406,9 @@ public class Game extends JPanel implements Listener {
         JButton queenBtn = new JButton();
         try {
             String path = String.format("/resource/chess/%s-queen.png", this.isWhiteTurn ? "w" : "b");
-            queenBtn.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path))));
+            ImageIcon icon = new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path)));
+            Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            queenBtn.setIcon(new ImageIcon(img));
         } catch (IOException e) {
             System.out.println("Error getiing image");
             System.out.println(e);
@@ -415,7 +418,9 @@ public class Game extends JPanel implements Listener {
         JButton bishopBtn = new JButton();
         try {
             String path = String.format("/resource/chess/%s-bishop.png", this.isWhiteTurn ? "w" : "b");
-            bishopBtn.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path))));
+            ImageIcon icon = new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path)));
+            Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            bishopBtn.setIcon(new ImageIcon(img));
         } catch (IOException e) {
             System.out.println("Error getiing image");
             System.out.println(e);
@@ -425,7 +430,9 @@ public class Game extends JPanel implements Listener {
         JButton knightBtn = new JButton();
         try {
             String path = String.format("/resource/chess/%s-knight.png", this.isWhiteTurn ? "w" : "b");
-            knightBtn.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path))));
+            ImageIcon icon = new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path)));
+            Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            knightBtn.setIcon(new ImageIcon(img));
         } catch (IOException e) {
             System.out.println("Error getiing image");
             System.out.println(e);
@@ -435,7 +442,9 @@ public class Game extends JPanel implements Listener {
         JButton rookBtn = new JButton();
         try {
             String path = String.format("/resource/chess/%s-rook.png", this.isWhiteTurn ? "w" : "b");
-            rookBtn.setIcon(new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path))));
+            ImageIcon icon = new ImageIcon(ImageIO.read(getClass().getResourceAsStream(path)));
+            Image img = icon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            rookBtn.setIcon(new ImageIcon(img));
         } catch (IOException e) {
             System.out.println("Error getiing image");
             System.out.println(e);
